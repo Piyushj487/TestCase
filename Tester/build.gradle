@@ -1,0 +1,45 @@
+apply plugin: 'groovy'
+apply plugin: 'java'
+
+sourceCompatibility = 1.8
+targetCompatibility = 1.8
+
+repositories {
+	jcenter()
+}
+
+dependencies {
+   testCompile(
+		   'org.codehaus.groovy:groovy-all:2.4.4',
+		   'org.spockframework:spock-core:1.0-groovy-2.4'
+   )
+   
+   compile 'org.codehaus.groovy:groovy-all:2.4.4'
+}
+
+sourceSets {
+	main {
+		java.srcDir "src/main/java"
+	}
+	test {
+		java.srcDir "src/test/groovy"
+	}
+	integrationTest {
+        java {
+            compileClasspath += main.output + test.output
+            runtimeClasspath += main.output + test.output
+            srcDir "src/integration/groovy"
+        }
+    }
+}
+
+configurations {
+	integrationTestCompile.extendsFrom testCompile
+	integrationTestRuntime.extendsFrom testRuntime
+}
+
+task integrationTest(type: Test) {
+	testClassesDirs = sourceSets.integrationTest.output.classesDirs
+	classpath = sourceSets.integrationTest.runtimeClasspath
+	outputs.upToDateWhen { false }
+}
